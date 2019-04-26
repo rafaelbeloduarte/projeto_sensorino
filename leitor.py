@@ -29,7 +29,7 @@ def sel():
 def graficoinst():
     plt.close()
     fig = plt.figure()
-    grafico = open('grafico.txt', 'r').read()
+    grafico = open('grafico.dat', 'r').read()
     vetores = grafico.split('\n')
     vetores = filter(None, vetores)
     lista_vetores = list(vetores)
@@ -50,7 +50,7 @@ def grafico():
     plt.close()
     fig = plt.figure()
     def animar(i):
-        grafico = open('grafico.txt', 'r').read()
+        grafico = open('grafico.dat', 'r').read()
         vetores = grafico.split('\n')
         vetores = filter(None, vetores)
         lista_vetores = list(vetores)
@@ -94,6 +94,8 @@ def handle_leitura():
         salvararquivo = asksaveasfilename(defaultextension=".txt", initialfile="dados")
         arquivousuario = open(salvararquivo, 'w')
         arquivousuario.close()
+        arquivo_sinal = open(salvararquivo.replace(".txt", "") + "_bruto.txt", "w")
+        arquivo_sinal.close()
     except Exception as e:
         messagebox.showinfo(e)
         return None
@@ -109,6 +111,7 @@ def handle_leitura():
         i_limpa_texto = 0
 
         arquivousuario = open(salvararquivo, 'a')
+        arquivo_sinal = open(salvararquivo.replace(".txt", "") + "_sinal.txt", 'a')
         rol = IntVar()
 
         rol_parar = Radiobutton(top, text="Parar rolagem", variable=rol, value=0)
@@ -129,8 +132,15 @@ def handle_leitura():
         limpar_graf_botao.grid(row=6, column=5, rowspan = 2)
         limpar_graf_botao.configure(activebackground='#000000', activeforeground='#FFFFFF', width=12, height=3)
 
-        graf = open("grafico.txt", 'w')
+        graf = open("grafico.dat", 'w')
         graf.close()
+
+        poli = open("polinomios.dat").readlines()
+        for i in range(len(poli)):
+            poli[i] = poli[i].replace("\n", "").split(" ")
+        for i in range(len(poli)):
+            for j in range(len(poli[i])):
+                poli[i][j] = float(poli[i][j])
 
         try:
             # LOOP DE LEITURA
@@ -138,7 +148,7 @@ def handle_leitura():
                 serial_bytes = ser.readline()
                 serial_texto = serial_bytes.decode('utf-8')
                 a = serial_texto.split(' ')
-                graf = open("grafico.txt", 'a')
+                graf = open("grafico.dat", 'a')
                 dados = []
                 dados_graf = []
                 if a:
@@ -147,10 +157,15 @@ def handle_leitura():
                     # retornando uma nova lista contendo os elementos resultantes da aplicação da função.
                     # The %s token allows to insert (and potentially format) a string.
                     # Notice that the %s token is replaced by whatever I pass to the string after the % symbol.
-                    dados = dados.replace('\n', '').replace('\r', '').replace('[', '').replace(']', '')     
+                    dados = dados.replace('\n', '').replace('\r', '').replace('[', '').replace(']', '')
+                    for i in range(len(dados)):
+                        dados[i] = float(dados[i])
+                print(type(dados[0]))
                 if dados:
                     arquivousuario.write(dados + '\n')
                     arquivousuario.flush()
+                    arquivo_sinal.write(dados + '\n')
+                    arquivo_sinal.flush()
                     graf.write(dados + '\n')
                     graf.flush()
                     text.insert(END, dados + '\n')
@@ -160,12 +175,12 @@ def handle_leitura():
                 if i_limpa_texto > 1000:
                     text.delete(1.0, END)
 
-                    graf = open('grafico.txt', 'r+')
+                    graf = open('grafico.dat', 'r+')
                     graf.truncate(0)
 
                     i_limpa_texto = 0
                 if limpar_graf.get() == 1:
-                    graf = open('grafico.txt', 'w')
+                    graf = open('grafico.dat', 'w')
                     graf.truncate(0)
 
                     limpar_graf.set(0)
@@ -177,6 +192,7 @@ def handle_leitura():
         ser.close()
         graf.close()
         arquivousuario.close()
+        arquivo_sinal.close()
 
     t = threading.Thread(target=iniciar)
     t.daemon = True
@@ -295,6 +311,52 @@ labelbaud.config(background='#000000', foreground='white', borderwidth=3, relief
 labelbaud.config(text=selection)
 # =====================================================================================
 
+label_n = Label(top, text = "Número de variáveis:")
+label_n.grid(row = 12, column = 6)
+label_n.configure(background='#000000', foreground='white')
+
+label_eqs = Label(top, text = "Equação da reta: y = a*x+b, padrão: y=x")
+label_eqs.grid(row = 13, column = 6, columnspan = 3)
+label_eqs.configure(background='#000000', foreground='white')
+
+n_texto = StringVar()
+n = Entry(top, textvariable = n_texto)
+n.grid(row=12, column=7)
+
+label_a = Label(top, text = "a:")
+label_a.grid(row = 14, column = 6)
+label_a.configure(background='#000000', foreground='white')
+
+arquivo_coef = open("polinomios.dat", 'w')
+arquivo_coef.close()
+
+def pega_coef():
+    coef_a = a.get()
+    coef_b = b.get()
+    arquivo_coef = open("polinomios.dat", 'a')
+    arquivo_coef.write(coef_a + " ")
+    arquivo_coef.write(coef_b + "\n")
+    arquivo_coef.close()
+    a.delete(0, END)
+    b.delete(0, END)
+
+
+a_texto = StringVar()
+a = Entry(top, textvariable = a_texto)
+a.grid(row=14, column=7)
+
+label_b = Label(top, text = "b:")
+label_b.grid(row = 15, column = 6)
+label_b.configure(background='#000000', foreground='white')
+
+b_texto = StringVar()
+b = Entry(top, textvariable = b_texto)
+b.grid(row=15, column=7)
+
+button_entrar = Button(top, text = "Inserir", command = pega_coef)
+button_entrar.grid(row=16, column=7)
+button_entrar.configure(activebackground='#000000', activeforeground='#FFFFFF')
+
 espaco = Label(top, text=" ")  # apenas coloca um espaço vazio no grid
 espaco.grid(row=5, column=1)
 espaco.configure(background='#000000', foreground='white')
@@ -332,9 +394,9 @@ text.insert(END, "\n")
 text.insert(END, "O loop de seu controlador deve\nretornar os dados da seguinte forma:\n")
 text.insert(END, "a b c ...\n")
 text.insert(END, "Ex: 1 2 3 4 5\n")
+text.insert(END, "Declare o número de variáveis\nantes de começar a leitura.\n")
 text.insert(END, "\n")
 text.see(END)
-
 # chama o mainloop -> abre a janela com os itens anteriores
 top.protocol("WM_DELETE_WINDOW", fechando)
 top.mainloop()
