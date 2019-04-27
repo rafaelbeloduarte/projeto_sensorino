@@ -202,7 +202,6 @@ def handle_leitura():
                 if lista_dados:
                     for i in range(len(poli)):
                         lista_dados[i] = poli[i][0]*lista_dados[i] + poli[i][1]
-                    print(str(lista_dados))
                     arquivousuario.write(str(lista_dados).replace('[', '').replace(']', '') + '\n')
                     arquivousuario.flush()
                     arquivo_sinal.write(dados + '\n')
@@ -255,7 +254,6 @@ def atualizarporta():
         R.grid(row=1, column=2 + i)
         R.configure(background='#F2F2F2', indicatoron=0, width=12)
         if "Arduino" in ports[i]:
-            # print(ports[i])
             R.select()
             selecao = "Porta selecionada:\n" + ports[i]
             label = Label(top)
@@ -311,7 +309,6 @@ for i in range(len(connected)):
     R.grid(row=1, column=2 + i)
     R.configure(indicatoron=0, width=12, activebackground='white', activeforeground='black')
     if "Arduino" or "Serial USB" in ports[i]:
-        print(ports[i])
         R.select()
         selecao = "Porta selecionada:\n" + str(var.get())
         label = Label(top)
@@ -380,7 +377,7 @@ def abre_polinomio():
         messagebox.showinfo(e)
         return None
 
-button_abre_poli = Button(top, text = "Abrir equações.", command = abre_polinomio)
+button_abre_poli = Button(top, text = "Carregar equações", command = abre_polinomio)
 button_abre_poli.grid(row=17, column=7)
 button_abre_poli.configure(activebackground='#000000', activeforeground='#FFFFFF')
 
@@ -412,7 +409,7 @@ def salva_polinomio():
         messagebox.showinfo(e)
         return None
 
-button_salva_poli = Button(top, text = "Salvar equações.", command = salva_polinomio)
+button_salva_poli = Button(top, text = "Salvar equações", command = salva_polinomio)
 button_salva_poli.grid(row=16, column=7)
 button_salva_poli.configure(activebackground='#000000', activeforeground='#FFFFFF')
 
