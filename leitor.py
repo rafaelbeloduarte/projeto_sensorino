@@ -149,7 +149,7 @@ def handle_leitura():
                 for i, arquivo in enumerate(arquivo):
                     pass
             linhas = i + 1
-            if linhas < int(n_texto.get()):
+            if linhas != int(n_texto.get()):
                 messagebox.showinfo("Atenção!", "Número de equações diferente do número de entradas. Os sinais das entradas restantes serão exibidos inalterados.")
                 escrever_polinomios = open(abre_poli.get(), 'a')
                 restantes = int(n_texto.get()) - len(poli)
