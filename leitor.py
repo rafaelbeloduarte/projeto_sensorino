@@ -32,14 +32,13 @@ def graficoinst():
     grafico = open('grafico.dat', 'r').read()
     vetores = grafico.split('\n')
     vetores = filter(None, vetores)
-    lista_vetores = list(vetores)
-    matriz_graf = []
-    for i in range(len(lista_vetores)):
-    	aux = lista_vetores[i].replace(" ", "")
-    	aux = aux.split(",")
-    	for j in range(len(aux)):
-    		aux[j] = int(aux[j])
-    	matriz_graf.append(aux)
+    vetores = list(vetores)
+    for i in range(len(vetores)):
+        aux = vetores[i].split(",")
+        for j in range(len(aux)):
+            aux[j] = float(aux[j])
+        vetores[i] = aux
+    matriz_graf = vetores
     plt.clf()
     eixo = fig.add_subplot(1, 1, 1)
     eixo.plot(matriz_graf)
@@ -53,14 +52,13 @@ def grafico():
         grafico = open('grafico.dat', 'r').read()
         vetores = grafico.split('\n')
         vetores = filter(None, vetores)
-        lista_vetores = list(vetores)
-        matriz_graf = []
-        for i in range(len(lista_vetores)):
-        	aux = lista_vetores[i].replace(" ", "")
-        	aux = aux.split(",")
-        	for j in range(len(aux)):
-        		aux[j] = int(aux[j])
-        	matriz_graf.append(aux)
+        vetores = list(vetores)
+        for i in range(len(vetores)):
+            aux = vetores[i].split(",")
+            for j in range(len(aux)):
+                aux[j] = float(aux[j])
+            vetores[i] = aux
+        matriz_graf = vetores
         plt.clf()
         eixo = fig.add_subplot(1, 1, 1)
         eixo.plot(matriz_graf)
@@ -90,11 +88,15 @@ def handle_leitura():
         messagebox.showinfo("Aviso!", "Selecione uma porta/baudrate.")
         return None
 
+    if not n_texto.get():
+        messagebox.showinfo("Aviso!", "Por favor, informe o número de entradas.")
+        return None
+
     try:
         salvararquivo = asksaveasfilename(defaultextension=".txt", initialfile="dados")
         arquivousuario = open(salvararquivo, 'w')
         arquivousuario.close()
-        arquivo_sinal = open(salvararquivo.replace(".txt", "") + "_bruto.txt", "w")
+        arquivo_sinal = open(salvararquivo.replace(".txt", "") + "_sinal.txt", "w")
         arquivo_sinal.close()
     except Exception as e:
         messagebox.showinfo(e)
@@ -135,12 +137,46 @@ def handle_leitura():
         graf = open("grafico.dat", 'w')
         graf.close()
 
-        poli = open("polinomios.dat").readlines()
+        if os.path.isfile("polinomios.txt") == False or os.stat("polinomios.txt").st_size == 0:
+            messagebox.showinfo("Atenção!", "Polinômios não encontrados, o sinal será apresentado nu.")
+            poli = open("polinomios.txt", 'w')
+            n_entradas = int(n_texto.get())
+            for i in range(n_entradas):
+                poli.write("1 0\n")
+        if abre_poli.get():
+            poli = open(abre_poli.get()).readlines()
+            with open(abre_poli.get()) as arquivo:
+                for i, arquivo in enumerate(arquivo):
+                    pass
+            linhas = i + 1
+            if linhas < int(n_texto.get()):
+                messagebox.showinfo("Atenção!", "Número de equações diferente do número de entradas. Os sinais das entradas restantes serão exibidos inalterados.")
+                escrever_polinomios = open(abre_poli.get(), 'a')
+                restantes = int(n_texto.get()) - len(poli)
+                for i in range(restantes):
+                    escrever_polinomios.write("1 0\n")
+                escrever_polinomios.close()
+        else:
+            poli = open("polinomios.txt").readlines()
+            with open("polinomios.txt") as arquivo:
+                for i, arquivo in enumerate(arquivo):
+                    pass
+            linhas = i + 1
+            if linhas < int(n_texto.get()):
+                messagebox.showinfo("Atenção!", "Número de equações diferente do número de entradas. Os sinais das entradas restantes serão exibidos inalterados.")
+                escrever_polinomios = open("polinomios.txt", 'a')
+                restantes = int(n_texto.get()) - len(poli)
+                for i in range(restantes):
+                    escrever_polinomios.write("1 0\n")
+                escrever_polinomios.close()
+
         for i in range(len(poli)):
             poli[i] = poli[i].replace("\n", "").split(" ")
         for i in range(len(poli)):
             for j in range(len(poli[i])):
                 poli[i][j] = float(poli[i][j])
+        text.insert(END, str(poli))
+        text.see(END)
 
         try:
             # LOOP DE LEITURA
@@ -150,25 +186,30 @@ def handle_leitura():
                 a = serial_texto.split(' ')
                 graf = open("grafico.dat", 'a')
                 dados = []
-                dados_graf = []
+                lista_dados = []
                 if a:
                     dados = '[%s]' % ', '.join(map(str, a))
                     # map serve para aplicarmos uma função a cada elemento de uma lista,
                     # retornando uma nova lista contendo os elementos resultantes da aplicação da função.
                     # The %s token allows to insert (and potentially format) a string.
                     # Notice that the %s token is replaced by whatever I pass to the string after the % symbol.
-                    dados = dados.replace('\n', '').replace('\r', '').replace('[', '').replace(']', '')
-                    for i in range(len(dados)):
-                        dados[i] = float(dados[i])
-                print(type(dados[0]))
-                if dados:
-                    arquivousuario.write(dados + '\n')
+                    dados = dados.replace('\n', '').replace('\r', '').replace('[', '').replace(']', '').replace(" ", "").replace("'", "")
+                    lista_dados = dados.split(",")
+                    lista_dados = filter(None, lista_dados)
+                    lista_dados = list(lista_dados)
+                    for i in range(len(lista_dados)):
+                        lista_dados[i] = float(lista_dados[i])
+                if lista_dados:
+                    for i in range(len(poli)):
+                        lista_dados[i] = poli[i][0]*lista_dados[i] + poli[i][1]
+                    print(str(lista_dados))
+                    arquivousuario.write(str(lista_dados).replace('[', '').replace(']', '') + '\n')
                     arquivousuario.flush()
                     arquivo_sinal.write(dados + '\n')
                     arquivo_sinal.flush()
-                    graf.write(dados + '\n')
+                    graf.write(str(lista_dados).replace('[', '').replace(']', '') + '\n')
                     graf.flush()
-                    text.insert(END, dados + '\n')
+                    text.insert(END, str(lista_dados).replace('[', '').replace(']', '') + '\n')
                     if rol.get() == 1:
                         text.see(END)
                     i_limpa_texto += 1
@@ -241,8 +282,8 @@ def fechando():
 # define a janela principal----------------------------------
 top = tkinter.Tk()
 top.wm_title("Leitor de dados - portas serial - DEQ - UEM")
-top.minsize(900, 650)
-top.geometry("900x650")
+top.minsize(800, 650)
+top.geometry("950x650")
 top.configure(background='#000000')
 # -----------------------------------------------------------
 
@@ -311,50 +352,84 @@ labelbaud.config(background='#000000', foreground='white', borderwidth=3, relief
 labelbaud.config(text=selection)
 # =====================================================================================
 
-label_n = Label(top, text = "Número de variáveis:")
-label_n.grid(row = 12, column = 6)
+label_n = Label(top, text = "Número de entradas:")
+label_n.grid(row = 11, column = 6)
 label_n.configure(background='#000000', foreground='white')
 
 label_eqs = Label(top, text = "Equação da reta: y = a*x+b, padrão: y=x")
-label_eqs.grid(row = 13, column = 6, columnspan = 3)
+label_eqs.grid(row = 13, column = 5, columnspan = 3)
 label_eqs.configure(background='#000000', foreground='white')
 
 n_texto = StringVar()
 n = Entry(top, textvariable = n_texto)
-n.grid(row=12, column=7)
+n.grid(row=12, column=6)
 
 label_a = Label(top, text = "a:")
-label_a.grid(row = 14, column = 6)
+label_a.grid(row = 14, column = 5)
 label_a.configure(background='#000000', foreground='white')
 
-arquivo_coef = open("polinomios.dat", 'w')
+arquivo_coef = open("polinomios.txt", 'w')
 arquivo_coef.close()
 
+abre_poli = StringVar()
+
+def abre_polinomio():
+    try:
+        abre_poli.set(filedialog.askopenfilename(initialdir = "/",title = "Selecione seu arquivo",filetypes = (("Arquivo de texto","*.txt"),("Todos os arquivos","*.*"))))
+    except Exception as e:
+        messagebox.showinfo(e)
+        return None
+
+button_abre_poli = Button(top, text = "Abrir equações.", command = abre_polinomio)
+button_abre_poli.grid(row=17, column=7)
+button_abre_poli.configure(activebackground='#000000', activeforeground='#FFFFFF')
+
 def pega_coef():
+    if not n_texto.get():
+        messagebox.showinfo("Aviso!", "Por favor, informe o número de entradas.")
+        return None
     coef_a = a.get()
     coef_b = b.get()
-    arquivo_coef = open("polinomios.dat", 'a')
+    text.insert(END, "y = " + coef_a + "*x" + " + " + coef_b + '\n')
+    text.see(END)
+    arquivo_coef = open("polinomios.txt", 'a')
     arquivo_coef.write(coef_a + " ")
     arquivo_coef.write(coef_b + "\n")
     arquivo_coef.close()
     a.delete(0, END)
     b.delete(0, END)
+    arquivo_coef.close()
 
+def salva_polinomio():
+    try:
+        salvar_poli = asksaveasfilename(defaultextension=".txt", initialfile="meus_polinomios")
+        arquivo_poli = open(salvar_poli, 'w')
+        texto = open("polinomios.txt").read()
+        texto = texto.replace('\r', '').replace('[', '').replace(']', '').replace(",", "").replace("'", "")
+        arquivo_poli.write(texto)
+        arquivo_poli.close()
+    except Exception as e:
+        messagebox.showinfo(e)
+        return None
+
+button_salva_poli = Button(top, text = "Salvar equações.", command = salva_polinomio)
+button_salva_poli.grid(row=16, column=7)
+button_salva_poli.configure(activebackground='#000000', activeforeground='#FFFFFF')
 
 a_texto = StringVar()
 a = Entry(top, textvariable = a_texto)
-a.grid(row=14, column=7)
+a.grid(row=14, column=6)
 
 label_b = Label(top, text = "b:")
-label_b.grid(row = 15, column = 6)
+label_b.grid(row = 15, column = 5)
 label_b.configure(background='#000000', foreground='white')
 
 b_texto = StringVar()
 b = Entry(top, textvariable = b_texto)
-b.grid(row=15, column=7)
+b.grid(row=15, column=6)
 
 button_entrar = Button(top, text = "Inserir", command = pega_coef)
-button_entrar.grid(row=16, column=7)
+button_entrar.grid(row=16, column=6)
 button_entrar.configure(activebackground='#000000', activeforeground='#FFFFFF')
 
 espaco = Label(top, text=" ")  # apenas coloca um espaço vazio no grid
@@ -389,12 +464,12 @@ espaco2.configure(background='#000000', foreground='white')
 text = ScrolledText(top, width=50, height=20)
 text.grid(row=11, column=1, columnspan=5, rowspan=10)
 
-text.insert(END, "Instruções:\n")
+text.insert(END, "          INSTRUÇÕES\n")
 text.insert(END, "\n")
-text.insert(END, "O loop de seu controlador deve\nretornar os dados da seguinte forma:\n")
+text.insert(END, ">O loop de seu controlador deve\nretornar os dados da seguinte forma:\n")
 text.insert(END, "a b c ...\n")
 text.insert(END, "Ex: 1 2 3 4 5\n")
-text.insert(END, "Declare o número de variáveis\nantes de começar a leitura.\n")
+text.insert(END, "\n>Declare o número de entradas\nantes de iniciar a leitura.\n")
 text.insert(END, "\n")
 text.see(END)
 # chama o mainloop -> abre a janela com os itens anteriores
