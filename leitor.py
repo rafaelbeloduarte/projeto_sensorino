@@ -137,20 +137,28 @@ def handle_leitura():
         graf = open("grafico.dat", 'w')
         graf.close()
 
-        if os.path.isfile("polinomios.txt") == False or os.stat("polinomios.txt").st_size == 0:
-            messagebox.showinfo("Atenção!", "Polinômios não encontrados, o sinal será apresentado nu.")
+        if os.path.isfile(abre_poli.get()) == False and os.path.isfile("polinomios.txt") == False:
+            messagebox.showinfo("Atenção!", "Arquivo não encontrado, o sinal será apresentado nu.")
             poli = open("polinomios.txt", 'w')
             n_entradas = int(n_texto.get())
             for i in range(n_entradas):
                 poli.write("1 0\n")
         if abre_poli.get():
+            if os.stat(abre_poli.get()).st_size == 0:
+                messagebox.showinfo("Atenção!", "Arquivo vazio, será preenchido com y=x.")
+                poli = open(abre_poli.get(), 'w')
+                n_entradas = int(n_texto.get())
+                for i in range(n_entradas):
+                    poli.write("1 0\n")
+                poli.close()
             poli = open(abre_poli.get()).readlines()
+            i = 0
             with open(abre_poli.get()) as arquivo:
                 for i, arquivo in enumerate(arquivo):
                     pass
             linhas = i + 1
-            if linhas != int(n_texto.get()):
-                messagebox.showinfo("Atenção!", "Número de equações diferente do número de entradas. Os sinais das entradas restantes serão exibidos inalterados.")
+            if linhas < int(n_texto.get()):
+                messagebox.showinfo("Atenção!", "Número de equações menor que o número de entradas. Os sinais das entradas restantes serão exibidos inalterados.")
                 escrever_polinomios = open(abre_poli.get(), 'a')
                 restantes = int(n_texto.get()) - len(poli)
                 for i in range(restantes):
@@ -158,12 +166,14 @@ def handle_leitura():
                 escrever_polinomios.close()
         else:
             poli = open("polinomios.txt").readlines()
+            i = 0
             with open("polinomios.txt") as arquivo:
                 for i, arquivo in enumerate(arquivo):
                     pass
             linhas = i + 1
+            print(str(linhas))
             if linhas < int(n_texto.get()):
-                messagebox.showinfo("Atenção!", "Número de equações diferente do número de entradas. Os sinais das entradas restantes serão exibidos inalterados.")
+                messagebox.showinfo("Atenção!", "Número de equações menor que o número de entradas. Os sinais das entradas restantes serão exibidos inalterados.")
                 escrever_polinomios = open("polinomios.txt", 'a')
                 restantes = int(n_texto.get()) - len(poli)
                 for i in range(restantes):
@@ -175,7 +185,7 @@ def handle_leitura():
         for i in range(len(poli)):
             for j in range(len(poli[i])):
                 poli[i][j] = float(poli[i][j])
-        text.insert(END, str(poli))
+        text.insert(END, "\n" + str(poli) + "\n\n")
         text.see(END)
 
         try:
@@ -233,6 +243,7 @@ def handle_leitura():
         graf.close()
         arquivousuario.close()
         arquivo_sinal.close()
+        poli.close()
 
     t = threading.Thread(target=iniciar)
     t.daemon = True
@@ -280,8 +291,8 @@ def fechando():
 # define a janela principal----------------------------------
 top = tkinter.Tk()
 top.wm_title("Leitor de dados - portas serial - DEQ - UEM")
-top.minsize(800, 650)
-top.geometry("950x650")
+top.minsize(1100, 700)
+top.geometry("1100x700")
 top.configure(background='#000000')
 # -----------------------------------------------------------
 
@@ -350,19 +361,19 @@ labelbaud.config(text=selection)
 # =====================================================================================
 
 label_n = Label(top, text = "Número de entradas:")
-label_n.grid(row = 11, column = 6)
+label_n.grid(row = 11, column = 7)
 label_n.configure(background='#000000', foreground='white')
 
 label_eqs = Label(top, text = "Equação da reta: y = a*x+b, padrão: y=x")
-label_eqs.grid(row = 13, column = 5, columnspan = 3)
+label_eqs.grid(row = 13, column = 6, columnspan = 3)
 label_eqs.configure(background='#000000', foreground='white')
 
 n_texto = StringVar()
 n = Entry(top, textvariable = n_texto)
-n.grid(row=12, column=6)
+n.grid(row=12, column=7)
 
 label_a = Label(top, text = "a:")
-label_a.grid(row = 14, column = 5)
+label_a.grid(row = 14, column = 6)
 label_a.configure(background='#000000', foreground='white')
 
 arquivo_coef = open("polinomios.txt", 'w')
@@ -373,12 +384,15 @@ abre_poli = StringVar()
 def abre_polinomio():
     try:
         abre_poli.set(filedialog.askopenfilename(initialdir = "/",title = "Selecione seu arquivo",filetypes = (("Arquivo de texto","*.txt"),("Todos os arquivos","*.*"))))
+        if abre_poli.get():
+            text.insert(END, "\nCarregado com sucesso.\n")
+            text.see(END)
     except Exception as e:
         messagebox.showinfo(e)
         return None
 
 button_abre_poli = Button(top, text = "Carregar equações", command = abre_polinomio)
-button_abre_poli.grid(row=17, column=7)
+button_abre_poli.grid(row=17, column=8)
 button_abre_poli.configure(activebackground='#000000', activeforeground='#FFFFFF')
 
 def pega_coef():
@@ -410,23 +424,23 @@ def salva_polinomio():
         return None
 
 button_salva_poli = Button(top, text = "Salvar equações", command = salva_polinomio)
-button_salva_poli.grid(row=16, column=7)
+button_salva_poli.grid(row=16, column=8)
 button_salva_poli.configure(activebackground='#000000', activeforeground='#FFFFFF')
 
 a_texto = StringVar()
 a = Entry(top, textvariable = a_texto)
-a.grid(row=14, column=6)
+a.grid(row=14, column=7)
 
 label_b = Label(top, text = "b:")
-label_b.grid(row = 15, column = 5)
+label_b.grid(row = 15, column = 6)
 label_b.configure(background='#000000', foreground='white')
 
 b_texto = StringVar()
 b = Entry(top, textvariable = b_texto)
-b.grid(row=15, column=6)
+b.grid(row=15, column=7)
 
 button_entrar = Button(top, text = "Inserir", command = pega_coef)
-button_entrar.grid(row=16, column=6)
+button_entrar.grid(row=16, column=7)
 button_entrar.configure(activebackground='#000000', activeforeground='#FFFFFF')
 
 espaco = Label(top, text=" ")  # apenas coloca um espaço vazio no grid
@@ -469,6 +483,7 @@ text.insert(END, "Ex: 1 2 3 4 5\n")
 text.insert(END, "\n>Declare o número de entradas\nantes de iniciar a leitura.\n")
 text.insert(END, "\n")
 text.see(END)
+
 # chama o mainloop -> abre a janela com os itens anteriores
 top.protocol("WM_DELETE_WINDOW", fechando)
 top.mainloop()
