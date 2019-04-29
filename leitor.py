@@ -20,11 +20,6 @@ def sel():
     connected = []
     for element in comlist:
         connected.append(element.device)
-    selecao = "Porta selecionada: \n" + str(var.get())
-    label = Label(top)
-    label.grid(row=2, column=1)
-    label.configure(background='#000000', foreground='white', borderwidth=3, relief='groove')
-    label.config(text=selecao)
 
 def graficoinst():
     plt.close()
@@ -67,11 +62,8 @@ def grafico():
     plt.show()
 
 def selbaud():
-    selection = "Baudrate: " + str(varbaud.get())
-    labelbaud = Label(top)
-    labelbaud.grid(row=4, column=1)
-    labelbaud.config(background='#000000', foreground='white', borderwidth=3, relief='groove', width=14)
-    labelbaud.config(text=selection)
+    text.insert(END, "\nBaudrate: " + str(varbaud.get()) + "\n")
+    text.see(END)
 
 def handle_leitura():
     try:
@@ -105,7 +97,7 @@ def handle_leitura():
                         stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
 
     instr_arquivo = Label(top, text="Para finalizar a leitura apenas feche o programa, seus dados são salvos automaticamente.")
-    instr_arquivo.grid(row=2, column=2, columnspan=5)
+    instr_arquivo.grid(row = 1, column=1, columnspan=5)
     instr_arquivo.configure(background='blue', foreground='white', borderwidth=3, relief='groove')
 
     def iniciar():  # Esta função lê o inpu
@@ -117,22 +109,13 @@ def handle_leitura():
         rol = IntVar()
 
         rol_parar = Radiobutton(top, text="Parar rolagem", variable=rol, value=0)
-        rol_parar.grid(row=22, column=2, columnspan = 1)
+        rol_parar.grid(row=20, column=2, columnspan = 1)
         rol_parar.configure(background='#F2F2F2', indicatoron=0, width=15)
 
         rol_iniciar = Radiobutton(top, text="Auto rolagem", variable=rol, value=1)
-        rol_iniciar.grid(row=22, column=3, columnspan=1)
+        rol_iniciar.grid(row=20, column=3, columnspan=1)
         rol_iniciar.configure(background='#F2F2F2', indicatoron=0, width=15)
         rol_iniciar.select()
-
-        limpar_graf = IntVar()
-
-        def limpar_graf_estado():
-            limpar_graf.set(1)
-
-        limpar_graf_botao = Button(top, text="Limpar gráfico", command=limpar_graf_estado)
-        limpar_graf_botao.grid(row=6, column=5, rowspan = 2)
-        limpar_graf_botao.configure(activebackground='#000000', activeforeground='#FFFFFF', width=12, height=3)
 
         graf = open("grafico.dat", 'w')
         graf.close()
@@ -153,9 +136,6 @@ def handle_leitura():
                 poli.close()
             poli = open(abre_poli.get()).readlines()
             i = 0
-            with open(abre_poli.get()) as arquivo:
-                for i, arquivo in enumerate(arquivo):
-                    pass
             linhas = i + 1
             if linhas < int(n_texto.get()):
                 messagebox.showinfo("Atenção!", "Número de equações menor que o número de entradas. Os sinais das entradas restantes serão exibidos inalterados.")
@@ -171,7 +151,6 @@ def handle_leitura():
                 for i, arquivo in enumerate(arquivo):
                     pass
             linhas = i + 1
-            print(str(linhas))
             if linhas < int(n_texto.get()):
                 messagebox.showinfo("Atenção!", "Número de equações menor que o número de entradas. Os sinais das entradas restantes serão exibidos inalterados.")
                 escrever_polinomios = open("polinomios.txt", 'a')
@@ -250,27 +229,22 @@ def handle_leitura():
     t.start()
 
 def atualizarporta():
+    portas_sub_menu.delete(0, 'end')
+    var.set("")
+    ports = list(serial.tools.list_ports.comports())
     comlist = serial.tools.list_ports.comports()
     connected = []
     for element in comlist:
         connected.append(element.device)
-    if not connected:
-        messagebox.showinfo("Aviso!", "Nenhuma porta disponível, verifique se seu dispositivo está conectado.")
-    # exibe as portas disponíveis
-    ports = list(serial.tools.list_ports.comports())
     for i in range(len(ports)):
         ports[i] = str(ports[i])
-    for i in range(len(connected)):
-        R = Radiobutton(top, text=connected[i], variable=var, value=str(connected[i]), command=sel)
-        R.grid(row=1, column=2 + i)
-        R.configure(background='#F2F2F2', indicatoron=0, width=12)
-        if "Arduino" in ports[i]:
-            R.select()
-            selecao = "Porta selecionada:\n" + ports[i]
-            label = Label(top)
-            label.grid(row=2, column=1)
-            label.configure(background='#000000', foreground='white', borderwidth=3, relief='groove')
-            label.config(text=selecao)
+    for k in range(len(connected)):
+        portas_sub_menu.add_radiobutton(label = connected[k], variable=var, value=str(connected[k]), command=sel)
+        if "Arduino" or "Serial USB" in ports[k]:
+            var.set(str(connected[k]))
+            portas_sub_menu.activate(k)
+    text.insert(END, "\nPorta selecionada: " + str(var.get()) + "\n")
+    text.see(END)
 
 def reiniciar():
     if messagebox.askokcancel("Reiniciando...", "Tem certeza?"):
@@ -291,8 +265,8 @@ def fechando():
 # define a janela principal----------------------------------
 top = tkinter.Tk()
 top.wm_title("Leitor de dados - portas serial - DEQ - UEM")
-top.minsize(1100, 700)
-top.geometry("1100x700")
+top.minsize(500, 500)
+top.geometry("950x600")
 top.configure(background='#000000')
 # -----------------------------------------------------------
 
@@ -303,77 +277,21 @@ for element in comlist:
 if not connected:
     messagebox.showinfo("Aviso!", "Nenhuma porta disponível, verifique se seu dispositivo está conectado.")
 
-# var1 é uma label ("Selecione a porta:")
-var1 = StringVar()
-label1 = Label(top, textvariable=var1, relief=RAISED, bd=0)
-var1.set("Selecione a porta:")
-label1.grid(row=1, column=1)
-label1.configure(background='#000000', foreground='white')
-
-# exibe as portas disponíveis
-ports = list(serial.tools.list_ports.comports())
-for i in range(len(ports)):
-    ports[i] = str(ports[i])
-var = StringVar()  # var armazena a porta que o usuário informa
-for i in range(len(connected)):
-    R = Radiobutton(top, text=connected[i], variable=var, value=str(connected[i]), command=sel)
-    R.grid(row=1, column=2 + i)
-    R.configure(indicatoron=0, width=12, activebackground='white', activeforeground='black')
-    if "Arduino" or "Serial USB" in ports[i]:
-        R.select()
-        selecao = "Porta selecionada:\n" + str(var.get())
-        label = Label(top)
-        label.grid(row=2, column=1)
-        label.configure(background='#000000', foreground='white', borderwidth=3, relief='groove')
-        label.config(text=selecao)
-# pega o baud rate, varbaud é o baudrate e var2 é uma label============================
-var2 = StringVar()
-label2 = Label(top, textvariable=var2, bd=0)
-var2.set("Selecione a taxa \n de transferência de \n dados (Baudrate):")
-label2.grid(row=3, column=1)
-label2.configure(background='#000000', foreground='white')
-varbaud = IntVar()
-R1 = Radiobutton(top, text="4800", variable=varbaud, value=4800, command=selbaud)
-R1.grid(row=3, column=2)
-R1.configure(indicatoron=0, width=12)
-R2 = Radiobutton(top, text="9600", variable=varbaud, value=9600, command=selbaud)
-R2.grid(row=3, column=3)
-R2.configure(indicatoron=0, width=12)
-R2.select()
-R3 = Radiobutton(top, text="38400", variable=varbaud, value=38400, command=selbaud)
-R3.grid(row=3, column=4)
-R3.configure(indicatoron=0, width=12)
-R4 = Radiobutton(top, text="57600", variable=varbaud, value=57600, command=selbaud)
-R4.grid(row=3, column=5)
-R4.configure(indicatoron=0, width=12)
-R5 = Radiobutton(top, text="115200", variable=varbaud, value=115200, command=selbaud)
-R5.grid(row=3, column=6)
-R5.configure(indicatoron=0, width=12)
-R6 = Radiobutton(top, text="230400", variable=varbaud, value=230400, command=selbaud)
-R6.grid(row=3, column=7)
-R6.configure(indicatoron=0, width=12)
-
-selection = "Baudrate: " + str(varbaud.get())
-labelbaud = Label(top)
-labelbaud.grid(row=4, column=1)
-labelbaud.config(background='#000000', foreground='white', borderwidth=3, relief='groove', width=14)
-labelbaud.config(text=selection)
-# =====================================================================================
-
 label_n = Label(top, text = "Número de entradas:")
-label_n.grid(row = 11, column = 7)
-label_n.configure(background='#000000', foreground='white')
-
-label_eqs = Label(top, text = "Equação da reta: y = a*x+b, padrão: y=x")
-label_eqs.grid(row = 13, column = 6, columnspan = 3)
-label_eqs.configure(background='#000000', foreground='white')
+label_n.grid(row = 2, column = 1, columnspan = 2, padx = 10, pady = 10)
+label_n.configure(background='#000000', foreground='white', width = 20)
 
 n_texto = StringVar()
 n = Entry(top, textvariable = n_texto)
-n.grid(row=12, column=7)
+n.grid(row = 2, column=3, padx = 10, pady = 10)
+n.configure(width = 10)
+
+label_eqs = Label(top, text = "Equação da reta: y = a*x+b, padrão: y=x")
+label_eqs.grid(row = 2, column = 6, columnspan = 3)
+label_eqs.configure(background='#000000', foreground='white')
 
 label_a = Label(top, text = "a:")
-label_a.grid(row = 14, column = 6)
+label_a.grid(row = 3, column = 6)
 label_a.configure(background='#000000', foreground='white')
 
 arquivo_coef = open("polinomios.txt", 'w')
@@ -392,7 +310,7 @@ def abre_polinomio():
         return None
 
 button_abre_poli = Button(top, text = "Carregar equações", command = abre_polinomio)
-button_abre_poli.grid(row=17, column=8)
+button_abre_poli.grid(row=6, column=7)
 button_abre_poli.configure(activebackground='#000000', activeforeground='#FFFFFF')
 
 def pega_coef():
@@ -423,57 +341,33 @@ def salva_polinomio():
         messagebox.showinfo(e)
         return None
 
+limpar_graf = IntVar()
+
+def limpar_graf_estado():
+    limpar_graf.set(1)
+
 button_salva_poli = Button(top, text = "Salvar equações", command = salva_polinomio)
-button_salva_poli.grid(row=16, column=8)
+button_salva_poli.grid(row=5, column=7)
 button_salva_poli.configure(activebackground='#000000', activeforeground='#FFFFFF')
 
 a_texto = StringVar()
 a = Entry(top, textvariable = a_texto)
-a.grid(row=14, column=7)
+a.grid(row=3, column=7)
 
 label_b = Label(top, text = "b:")
-label_b.grid(row = 15, column = 6)
+label_b.grid(row = 4, column = 6)
 label_b.configure(background='#000000', foreground='white')
 
 b_texto = StringVar()
 b = Entry(top, textvariable = b_texto)
-b.grid(row=15, column=7)
+b.grid(row=4, column=7)
 
 button_entrar = Button(top, text = "Inserir", command = pega_coef)
-button_entrar.grid(row=16, column=7)
+button_entrar.grid(row=3, column=8, rowspan = 2, padx = 15)
 button_entrar.configure(activebackground='#000000', activeforeground='#FFFFFF')
 
-espaco = Label(top, text=" ")  # apenas coloca um espaço vazio no grid
-espaco.grid(row=5, column=1)
-espaco.configure(background='#000000', foreground='white')
-# botão que chama o gráfico dos dados
-botaograf = tkinter.Button(top, text="Exibir gráfico em tempo real", command=grafico)
-botaograf.grid(row=7, column=3, columnspan = 2)
-botaograf.configure(activebackground='#000000', activeforeground='#FFFFFF', width = 25)
-
-botaograf_inst = tkinter.Button(top, text="Exibir gráfico", command=graficoinst)
-botaograf_inst.grid(row=6, column=3, columnspan = 2)
-botaograf_inst.configure(activebackground='#000000', activeforeground='#FFFFFF', width = 25)
-
-
-inicia = tkinter.Button(top, text="Iniciar leitura", command=handle_leitura)
-inicia.grid(row=6, column=1)
-inicia.configure(activebackground='#000000', activeforeground='#FFFFFF', width=12)
-
-reinicia = tkinter.Button(top, text="Reiniciar", command=reiniciar, width=12)
-reinicia.grid(row=6, column=7)
-reinicia.configure(activebackground='#000000', activeforeground='#FFFFFF', width=12)
-
-atporta = tkinter.Button(top, text="Atualizar portas", command=atualizarporta)  # botão atualizar portas
-atporta.grid(row=6, column=6)
-atporta.configure(activebackground='#000000', activeforeground='#FFFFFF', width=12)
-
-espaco2 = Label(top, text=" ")  # apenas coloca um espaço vazio no grid
-espaco2.grid(row=8, column=1)
-espaco2.configure(background='#000000', foreground='white')
-
 text = ScrolledText(top, width=50, height=20)
-text.grid(row=11, column=1, columnspan=5, rowspan=10)
+text.grid(row=3, column=1, columnspan=5, rowspan=10, padx = 10, pady = 10)
 
 text.insert(END, "          INSTRUÇÕES\n")
 text.insert(END, "\n")
@@ -483,6 +377,52 @@ text.insert(END, "Ex: 1 2 3 4 5\n")
 text.insert(END, "\n>Declare o número de entradas\nantes de iniciar a leitura.\n")
 text.insert(END, "\n")
 text.see(END)
+
+# criar menu
+menubar = Menu(top)
+
+menubar.add_command(label="Iniciar leitura", command=handle_leitura)
+
+graf_menu = Menu(menubar, tearoff=0)
+menubar.add_cascade(label="Gráficos", menu=graf_menu)
+graf_menu.add_command(label="Exibir gráfico em tempo real", command=grafico)
+graf_menu.add_command(label="Exibir gráfico", command=graficoinst)
+graf_menu.add_separator()
+graf_menu.add_command(label="Limpar gráfico", command=limpar_graf_estado)
+
+controlador_menu = Menu(menubar, tearoff=0)
+menubar.add_cascade(label="Controlador", menu=controlador_menu)
+portas_sub_menu = Menu(controlador_menu, tearoff = 0)
+controlador_menu.add_cascade(label="Portas", menu=portas_sub_menu)
+
+var = StringVar()
+atualizarporta()
+
+baud_sub_menu = Menu(controlador_menu, tearoff = 0)
+controlador_menu.add_cascade(label = "Baudrate", menu = baud_sub_menu)
+
+# pega o baud rate, varbaud é o baudrate===============================================
+#4800, 9600, 38400, 57600, 115200, 230400
+varbaud = IntVar()
+baud_sub_menu.add_radiobutton(label = "4800", variable = varbaud, value = 4800, command = selbaud)
+baud_sub_menu.add_radiobutton(label = "9600", variable = varbaud, value = 9600, command = selbaud)
+baud_sub_menu.add_radiobutton(label = "38400", variable = varbaud, value = 38400, command = selbaud)
+baud_sub_menu.add_radiobutton(label = "57600", variable = varbaud, value = 57600, command = selbaud)
+baud_sub_menu.add_radiobutton(label = "115200", variable = varbaud, value = 115200, command = selbaud)
+baud_sub_menu.add_radiobutton(label = "230400", variable = varbaud, value = 230400, command = selbaud)
+baud_sub_menu.invoke(1)
+# =====================================================================================
+
+controlador_menu.add_separator()
+controlador_menu.add_command(label = "Atualizar portas", command = atualizarporta)
+
+sair_menu = Menu(menubar, tearoff=0)
+menubar.add_cascade(label="Sair/Reiniciar", menu=sair_menu)
+sair_menu.add_command(label = "Reiniciar", command = reiniciar)
+sair_menu.add_command(label="Sair", command=fechando)
+
+# mostrar o menu
+top.config(menu=menubar)
 
 # chama o mainloop -> abre a janela com os itens anteriores
 top.protocol("WM_DELETE_WINDOW", fechando)
