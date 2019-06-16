@@ -5,7 +5,7 @@ Instruções:
 
 	O loop de seu controlador deve retornar os dados da seguinte forma:
 	a b c ...
-Ex:     1 2 3 4 5
+	Ex:     1 2 3 4 5
 
 
 Para verificar a autenticidade do arquivo importe minha chave pública:
@@ -40,6 +40,7 @@ iqJCtv7skVnt2fVVUJGVj3/6FG8n3oDms95VhX4eZWfVZVtXx12nATK4enQCqlqV
 HqMzu4yGKmDiVJqOP1cfKJiYFt8uIeMAroU5goAPyITcMY661YapaEffJopR0DcI
 uQ/l
 =Mqfd
+
 -----END PGP PUBLIC KEY BLOCK-----
 
 Também disponível em: https://pgp.mit.edu/; Meu e-mail: rafaelbelo94@gmail.com
