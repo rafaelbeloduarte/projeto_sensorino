@@ -43,6 +43,5 @@ uQ/l
 
 -----END PGP PUBLIC KEY BLOCK-----
 
-Também disponível em: https://pgp.mit.edu/; Meu e-mail: rafaelbelo94@gmail.com
-
+Também disponível em: https://pgp.mit.edu/; Meu e-mail: rafaelbeloduarte@protonmail.com
 Verifique.
