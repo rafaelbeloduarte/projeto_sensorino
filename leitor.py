@@ -38,7 +38,7 @@ def graficoinst():
     eixo = fig.add_subplot(1, 1, 1)
     eixo.plot(matriz_graf)
    # eixo.legend()
-    fig.show()
+    plt.show()
 
 def grafico():
     plt.close()
