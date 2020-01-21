@@ -264,7 +264,7 @@ def fechando():
 
 # define a janela principal----------------------------------
 top = tkinter.Tk()
-top.wm_title("Leitor de dados - portas serial - DEQ - UEM")
+top.wm_title("Sensorino Salva!")
 top.minsize(500, 500)
 top.geometry("950x600")
 top.configure(background='#000000')
