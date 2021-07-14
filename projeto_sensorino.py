@@ -57,7 +57,7 @@ def grafico():
         plt.clf()
         eixo = fig.add_subplot(1, 1, 1)
         eixo.plot(matriz_graf)
-       # eixo.legend()
+        # eixo.legend()
     ani = animation.FuncAnimation(fig, animar, interval=1000)
     plt.show()
 
@@ -222,7 +222,7 @@ def handle_leitura():
         graf.close()
         arquivousuario.close()
         arquivo_sinal.close()
-        poli.close()
+#        poli.close()
 
     t = threading.Thread(target=iniciar)
     t.daemon = True
