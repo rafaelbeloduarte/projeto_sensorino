@@ -3,7 +3,7 @@ import tkinter
 import serial
 import serial.tools.list_ports
 import threading
-from tkinter.filedialog import asksaveasfilename
+from tkinter import filedialog
 from tkinter import *
 import sys
 import os
@@ -85,7 +85,7 @@ def handle_leitura():
         return None
 
     try:
-        salvararquivo = asksaveasfilename(defaultextension=".txt", initialfile="dados")
+        salvararquivo = filedialog.asksaveasfilename(defaultextension=".txt", initialfile="dados")
         arquivousuario = open(salvararquivo, 'w')
         arquivousuario.close()
         arquivo_sinal = open(salvararquivo.replace(".txt", "") + "_sinal.txt", "w")
@@ -301,7 +301,7 @@ abre_poli = StringVar()
 
 def abre_polinomio():
     try:
-        abre_poli.set(filedialog.askopenfilename(initialdir = "/",title = "Selecione seu arquivo",filetypes = (("Arquivo de texto","*.txt"),("Todos os arquivos","*.*"))))
+        abre_poli.set(filedialog.askopenfilename(initialdir = "",title = "Selecione seu arquivo",filetypes = (("Arquivo de texto","*.txt"),("Todos os arquivos","*.*"))))
         if abre_poli.get():
             text.insert(END, "\nCarregado com sucesso.\n")
             text.see(END)
@@ -331,7 +331,7 @@ def pega_coef():
 
 def salva_polinomio():
     try:
-        salvar_poli = asksaveasfilename(defaultextension=".txt", initialfile="meus_polinomios")
+        salvar_poli = filedialog.asksaveasfilename(defaultextension=".txt", initialfile="meus_polinomios")
         arquivo_poli = open(salvar_poli, 'w')
         texto = open("polinomios.txt").read()
         texto = texto.replace('\r', '').replace('[', '').replace(']', '').replace(",", "").replace("'", "")
